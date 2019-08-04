@@ -22,7 +22,7 @@ hive --database problem1 -f solution.sql
 ![결과 이미지](/img/2-1.PNG)
 
 #### [실행 결과]   
-![결과 이미지](/img/2-2.PNG)
+![결과 이미지](/img/2-1-1.PNG)
 
 
 ## Problem 2.
@@ -53,7 +53,7 @@ where a.amount >= 0
 ;
 ```
 #### [실행 결과]  
-![결과 이미지](/img/2-2.PNG)
+![결과 이미지](/img/2-3.PNG)
 
 
 ## Problem 4.
@@ -73,7 +73,7 @@ fields terminated by '\t'
 location '/user/training/problem4/data/employee1/.'
 ```
 #### [실행 결과]  
-![결과 이미지](/img/2-2.PNG)
+![결과 이미지](/img/2-4.PNG)
 ```
 create external table employee2
 (
@@ -91,7 +91,7 @@ fields terminated by ','
 location '/user/training/problem4/data/employee2/.'
 ```
 #### [실행 결과]  
-![결과 이미지](/img/2-2.PNG)
+![결과 이미지](/img/2-4.PNG)
 
 ```
 create table solution as
@@ -111,7 +111,7 @@ where state = 'CA'
 ;
 ```
 #### [실행 결과]  
-![결과 이미지](/img/2-2.PNG)
+![결과 이미지](/img/2-4.PNG)
 
 ```
 insert OVERWRITE DIRECTORY '/user/training/problem4/solution/'
@@ -121,7 +121,7 @@ SELECT * FROM solution
 ;
 ```
 #### [실행 결과]  
-![결과 이미지](/img/2-2.PNG)
+![결과 이미지](/img/2-4.PNG)
 
 ## Problem 5.
 
@@ -139,24 +139,26 @@ where city='Palo Alto'
 and state = 'CA'
 ;
 ```
-#### [실행 결과]  
-![결과 이미지](/img/2-2.PNG)
-
 ```
+mkdir problem5
+cd problem5
+vi solution.sql
 hive --database problem5 -f solution.sql
 ```
+
 #### [실행 결과]  
-![결과 이미지](/img/2-2.PNG)
+![결과 이미지](/img/2-5.PNG)
 
 ## Problem 6.
 ```
 create table solution as
-select id,fname,lname,address,city,state,zip,substr(birthday,7,4) birthyear
+select id, fname, lname, address, city, state, zip,
+      substr(birthday,7,4) as birthyear
 from employee
 ;
 ```
 #### [실행 결과]  
-![결과 이미지](/img/2-2.PNG)
+![결과 이미지](/img/2-6.PNG)
 
 ## Problem 7.
 ```
@@ -170,73 +172,92 @@ order by lname, fname
 ) res
 ;
 ```
-![](/img/2-25.PNG)
 ```
+mkdir problem7
+cd problem7
+vi solution.sql
 hive --database problem7 -f solution.sql
 ```
+
 #### [실행 결과]  
-![결과 이미지](/img/2-2.PNG)
+![결과 이미지](/img/2-7.PNG)
 
 ## Problem 8.
 
 ```
-sqoop export
---connect jdbc:mysql://localhost/problem8
---username cloudera
---password cloudera
---table solution
---fields-terminated-by '\t'
+sqoop export                              \
+--connect jdbc:mysql://localhost/problem8 \
+--username cloudera \
+--password cloudera \
+--table solution    \
+--fields-terminated-by '\t' \
 --export-dir /user/training/problem8/data/customer/.
 ```
 #### [실행 결과]  
-![결과 이미지](/img/2-2.PNG)
+![결과 이미지](/img/2-8-1.PNG)
+
+```
+mysql -u cloudera -p problem8
+
+mysql> select * from solution;
+```
 
 #### [실행 결과]  
-![결과 이미지](/img/2-2.PNG)
+![결과 이미지](/img/2-8-2.PNG)
 
 ## Problem 9.
 
 ```
-# concat 사용하니까 id의 type이 자동으로 string이 되었음.
+use problem9 ;
 create table solution as
 select concat('A',id) id, fname, lname, address, city, state, zip from customer
 ;
 ```
 
 #### [실행 결과]  
-![결과 이미지](/img/2-2.PNG)
+![결과 이미지](/img/2-9.PNG)
 
 ## Problem 10.
 
 ```
 create view solution as
-select c.id id, c.fname fname, c.lname lname, c.state state, c.zip zip, b.charge charge, substr(b.tstamp,0,10) billdate
+select c.id id, c.fname fname, c.lname lname, c.state state, c.zip zip, b.charge charge,
+to_date(b.tstamp)  as billdata
 from billing b, customer c
-where b.id = c.id
-;
+where b.id = c.id;
+select * from solution;
 ```
 
 #### [실행 결과]  
-![결과 이미지](/img/2-2.PNG)
+![결과 이미지](/img/2-10.PNG)
 
 
 ## Problem 11.
 #### A.
 ```
-select o.prod_id, count(*) cnt from order_details o, products p
+select o.prod_id, p.name, count(*) cnt from order_details o, products p
 where o.prod_id = p.prod_id
 and p.brand = 'Dualcore'
-group by o.prod_id
+group by o.prod_id, p.name
 order by cnt desc
 limit 3;
 ```
 
+```
+mkdir problem11
+cd problem11
+vi solution.sql
+hive --database default -f solution.sql
+```
+
 #### [실행 결과]  
-![결과 이미지](/img/2-2.PNG)
+![결과 이미지](/img/2-11-1.PNG)
 
 #### B.
 ```
-select to_date(o.order_date) date, sum(p.price) revenue, sum(p.price-p.cost) profit
+select to_date(o.order_date) as dt,
+      sum(p.price) as revenue,
+      sum(p.price-p.cost) as profit
 from orders o, order_details d, products p
 where o.order_id = d.order_id
 and d.prod_id = p.prod_id
@@ -245,7 +266,7 @@ group by to_date(o.order_date);
 ```
 
 #### [실행 결과]  
-![결과 이미지](/img/2-2.PNG)
+![결과 이미지](/img/2-11-2.PNG)
 
 #### C.
 ```
@@ -259,4 +280,4 @@ limit 10;
 ```
 
 #### [실행 결과]  
-![결과 이미지](/img/2-2.PNG)
+![결과 이미지](/img/2-11-3.PNG)
